@@ -2,7 +2,7 @@
 
 GUI to label images. Uses opencv simple blob detector to help find features to label.
 ...
-python3 main.py (main.py will be renamed to represent the app name in the end)
+>python3 main.py (main.py will be renamed to represent the app name in the end)
 ...
 
 
