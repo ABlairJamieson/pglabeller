@@ -366,7 +366,8 @@ class MainGUI(ttk.Frame):
                         self.blob_manager.clear_selection()
                         self.blob_manager.select_blob(blob)
 
-                self.__is_dragging = True
+                
+                    self.__is_dragging = True
                 break
 
         self.__start_pos = mouse_pos
