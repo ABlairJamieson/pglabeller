@@ -45,9 +45,11 @@ class MainGUI(ttk.Frame):
         self.__centre = np.array([0,0]) #new blob center
         self.__radius = 0 #new blob radius
         self.__start_drawing = False
-
+        self.__ctrl_pressed = False
         self.__is_image_loaded = False
+        self.__draw_selection_rect = False
         self.__select_cursor_tool()
+        
         
     def __create_canvas(self):
         DEFAULT_WIDTH = 800
@@ -184,15 +186,41 @@ class MainGUI(ttk.Frame):
         button_bottom.pack(side='left', padx=10, pady=10)
         '''
 
+    def __select_blobs_in_rect(self):
+        if not self.__ctrl_pressed:
+            self.blob_manager.clear_selection()
+
+        x0 = min(self.__start_pos[0], self.__rect_end[0])
+        x1 = max(self.__start_pos[0], self.__rect_end[0])
+        y0 = min(self.__start_pos[1], self.__rect_end[1])
+        y1 = max(self.__start_pos[1], self.__rect_end[1])
+            
+        for blob in self.blob_manager.get_blobs():
+            blob_center = [blob.x, blob.y]  
+            radius = blob.r  
+            
+            if((blob_center[0] + radius <= x1) and (blob_center[0] - radius >= x0) and (blob_center[1] + radius <= y1) and (blob_center[1] - radius >= y0)):
+                self.blob_manager.select_blob(blob)
+
+
+        self.__draw_selection_rect = False
+        self.canvas.redraw()
+
+        
 
     def __set_drawing(self, cx, cy):
         if not self.__is_image_loaded:
             return
 
         if self.__current_tool == "cursor tool":
-            return
-        
-        if self.__current_tool == "draw tool":
+            if not self.__is_dragging:
+                self.canvas.delete("RectLayer")
+                if self.__draw_selection_rect:
+                    self.__select_blobs_in_rect()
+
+                
+                    
+        elif self.__current_tool == "draw tool":
             self.__start_drawing = not self.__start_drawing
             if self.__start_drawing:
                 self.__centre = self.canvas.screen_to_orig_image_coord(np.array([cx, cy]))
@@ -211,8 +239,16 @@ class MainGUI(ttk.Frame):
         self.canvas.register_left_button_drag(self.__sDrag)
         self.canvas.register_right_button_click(self.__reset_drawing)
         self.canvas.register_del_key(self.__delete_selected_blob)
+        self.canvas.register_ctrl_press(self.__set_ctrl)
+        self.canvas.register_ctrl_release(self.__reset_ctrl)
         self.canvas.register_mouse_move(self.__handle_mouse_movement)
 
+    def __set_ctrl(self, event):
+        self.__ctrl_pressed = True
+        
+    def __reset_ctrl(self, event):
+        self.__ctrl_pressed = False
+        
     def __draw_new_blob(self):
         self.canvas.delete("newBlobLayer")
         
@@ -250,8 +286,16 @@ class MainGUI(ttk.Frame):
         if self.__current_tool == "draw tool":
             return
         
-        self.blob_manager.delete_selected_blob()
+        self.blob_manager.delete_selected_blobs()
         self.canvas.redraw()
+
+
+    def __draw_selection_box(self):
+        self.canvas.delete("RectLayer")
+        p0 = self.canvas.orig_image_to_screen(np.array(self.__start_pos))
+        p1 = self.canvas.orig_image_to_screen(np.array(self.__rect_end))
+        rect_id = self.canvas.create_rectangle(p0[0], p0[1], p1[0], p1[1],outline="green", dash=(4, 8), width=5, tag="RectLayer")
+
         
     def __sDrag(self, cx, cy):
         if not self.__is_image_loaded:
@@ -259,34 +303,34 @@ class MainGUI(ttk.Frame):
         
         if self.__current_tool == "draw tool":
             return
+
+        mouse_pos = self.canvas.screen_to_orig_image_coord(np.array([cx, cy]))
         
-        
-        selected_blob = self.blob_manager.get_selected_blob()
-        if(selected_blob is not None):
-            #mouse_pos = [event.x, event.y]
-            mouse_pos = self.canvas.screen_to_orig_image_coord(np.array([cx, cy]))
-            del_pos = [mouse_pos[0] - self.start_pos[0], mouse_pos[1] - self.start_pos[1]]
+        if self.__is_dragging:
+            del_pos = [mouse_pos[0] - self.__start_pos[0], mouse_pos[1] - self.__start_pos[1]]
             thickness = self.blob_manager.get_thickness()
-            blob_center = [selected_blob.x, selected_blob.y] 
-            radius = selected_blob.r  
             
-            if(selected_blob.is_dragging):
+            for selected_blob in self.blob_manager.get_selected_blobs():
+                blob_center = [selected_blob.x, selected_blob.y] 
+                radius = selected_blob.r  
+            
                 selected_blob.x += del_pos[0]
                 selected_blob.y += del_pos[1]
 
-                self.start_pos = mouse_pos
   
-            else:
-                if( (abs(blob_center[0] - mouse_pos[0]) <= radius) and (abs(blob_center[1] - mouse_pos[1]) <= radius) and ((abs(blob_center[0] - mouse_pos[0]) >= (radius/1.4142)) or (abs(blob_center[1] - mouse_pos[1]) >= (radius/1.4142)))):
-                    selected_blob.is_dragging = True
-             
+            self.__start_pos = mouse_pos
+            
+        else:
+            self.__draw_selection_rect = True
+            self.__rect_end = mouse_pos
+            #self.canvas.create_oval(x0, y0, x1, y1, outline=color, width=thickness*scale, tag="BlobLayer")
 
         self.canvas.redraw()
-
+            
     def __reset_drawing(self, cx, cy):
         if self.__current_tool == "cursor tool":
             return
-
+            
         if self.__start_drawing:
             self.canvas.delete("newBlobLayer")
             self.__radius = 0
@@ -299,18 +343,37 @@ class MainGUI(ttk.Frame):
             return
         
         mouse_pos = self.canvas.screen_to_orig_image_coord(np.array([cx, cy]))
-        self.blob_manager.set_selected_blob(None)
+        #self.blob_manager.set_selected_blob(None)
+        
         half_thickness = self.blob_manager.get_thickness()/2.0
 
+        #is_something_selected = False
+        #if not self.__ctrl_pressed: 
+            
+        clicked_bkg = True
+        self.__is_dragging = False
+        
         for blob in self.blob_manager.get_blobs():
             blob_center = [blob.x, blob.y]  
             radius = blob.r  
             
             if( (abs(mouse_pos[0] - blob_center[0]) <= radius + half_thickness) and (abs(mouse_pos[1] - blob_center[1]) <= radius + half_thickness) and ((abs(mouse_pos[0] - blob_center[0]) >= (radius/1.4142) - half_thickness) or (abs(mouse_pos[1] - blob_center[1]) >= (radius/1.4142)-half_thickness))):
-                self.blob_manager.set_selected_blob(blob)
-                blob.is_dragging = True
-                self.start_pos = mouse_pos
+                clicked_bkg = False
+                if self.__ctrl_pressed:
+                    self.blob_manager.toggle_selection(blob)
+                else:
+                    if not self.blob_manager.is_selected(blob):
+                        self.blob_manager.clear_selection()
+                        self.blob_manager.select_blob(blob)
+
+                self.__is_dragging = True
                 break
+
+        self.__start_pos = mouse_pos
+        
+        if clicked_bkg and not self.__ctrl_pressed:
+            self.blob_manager.clear_selection()
+
             
         self.canvas.redraw()
                
@@ -395,6 +458,8 @@ class MainGUI(ttk.Frame):
 
         self.__draw_new_blob()
 
+        if self.__draw_selection_rect:
+            self.__draw_selection_box()
 
     def __render_blobs(self, scale):
         
@@ -406,7 +471,7 @@ class MainGUI(ttk.Frame):
         
         if self.blob_manager is not None:
             #image_with_blobs = self.original_image.copy()
-            selected_blob = self.blob_manager.get_selected_blob()
+            selected_blobs = self.blob_manager.get_selected_blobs()
             thickness = self.blob_manager.get_thickness()
             #print("total blobs found = " ,len(self.blob_manager.get_blobs()))
             for blob in self.blob_manager.get_blobs():
@@ -414,7 +479,7 @@ class MainGUI(ttk.Frame):
                 radius = blob.r  # Convert radius to integer
                 
                 color = "green"#(0, 255, 0)  # Color (green in BGR)
-                if(selected_blob is not None and blob.id == selected_blob.id):
+                if blob in selected_blobs:#selected_blob is not None and blob.id == selected_blob.id):
                     color = "red"#(255, 0, 0)
 
                 #center = self.canvas.orig_image_to_screen(np.array(center))

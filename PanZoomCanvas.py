@@ -48,10 +48,18 @@ class PanZoomCanvas(tk.Canvas):
         self.bind("<Motion>", self.__on_mouse_move)  # Update coordinate label.
         
     def register_del_key(self, callback_function):
-        print("delete binding set")
         self.__delete_callback = callback_function
         self.bind("<Delete>", self.__delete_callback)
-        
+
+    def register_ctrl_press(self, callback_function):
+        #event.widget.focus_set()
+        self.__ctrl_press_callback = callback_function
+        self.bind("<KeyPress-Control_L>", self.__ctrl_press_callback)
+
+    def register_ctrl_release(self, callback_function):
+        #event.widget.focus_set()
+        self.__ctrl_release_callback = callback_function
+        self.bind("<KeyRelease-Control_L>", self.__ctrl_release_callback)
         
     def __on_left_click(self, event):
         event.widget.focus_set()
