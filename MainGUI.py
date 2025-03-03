@@ -142,6 +142,7 @@ class MainGUI(ttk.Frame):
         self.__right_widget_manager.add_widget("Blob_Min_Dist", LabelEntryWidget, label_text="Min Dist betn Blobs", default_value=1, min_value = 1)
 
         self.__right_widget_manager.add_widget("total_blobs", ttk.Label, text="Total Blobs: 0", style = "Bold.TLabel")
+        self.__right_widget_manager.add_widget("selected_blobs", ttk.Label, text="Selected Blobs: 0", style = "Bold.TLabel")
         self.__right_widget_manager.add_widget("detect_blobs", ttk.Button, text="Detect Blobs", command=self.detect_blobs)
         
         #Filter options
@@ -466,6 +467,9 @@ class MainGUI(ttk.Frame):
         
         text = "Total Blobs: " + str(len(self.blob_manager.get_blobs()))
         self.__right_widget_manager.get_widget("total_blobs").config(text=text)
+
+        text = "Selected Blobs: " + str(len(self.blob_manager.get_selected_blobs()))
+        self.__right_widget_manager.get_widget("selected_blobs").config(text=text)
            
         if not self.__draw_blobs:
             return
