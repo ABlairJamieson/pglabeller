@@ -177,7 +177,10 @@ class MainGUI(ttk.Frame):
         
         self.__bottom_widget_manager.add_widget("show_blobs", ttk.Checkbutton, text="Show Blobs", layout_options={'side': 'left', 'padx': 10}, variable=tk.IntVar(value=1), command=self.__show_blobs)
         
-        
+
+        #Disable widgets on startup
+        self.__right_widget_manager.disable_all_widgets()
+        self.__bottom_widget_manager.disable_all_widgets()
         
         '''
         # Add widgets to the bottom frame
@@ -393,6 +396,9 @@ class MainGUI(ttk.Frame):
             self.blob_manager.reset()
             self.__is_image_loaded = True
             self.canvas.reset()
+            self.__right_widget_manager.enable_all_widgets()
+            self.__bottom_widget_manager.enable_all_widgets()
+        
         '''
         file_path = filedialog.askopenfilename(
             filetypes=[
