@@ -244,7 +244,7 @@ class MainGUI(ttk.Frame):
         self.canvas.register_ctrl_release(self.__reset_ctrl)
         self.canvas.register_mouse_move(self.__handle_mouse_movement)
 
-    def __set_ctrl(self):
+    def __set_ctrl(self, event):
         self.__ctrl_pressed = True
         
     def __reset_ctrl(self, event):
