@@ -143,7 +143,7 @@ class MainGUI(ttk.Frame):
 
         self.__right_widget_manager.add_widget("total_blobs", ttk.Label, text="Total Blobs: 0", style = "Bold.TLabel")
         self.__right_widget_manager.add_widget("selected_blobs", ttk.Label, text="Selected Blobs: 0", style = "Bold.TLabel")
-        self.__right_widget_manager.add_widget("detect_blobs", ttk.Button, text="Detect Blobs", command=self.detect_blobs)
+        self.__right_widget_manager.add_widget("detect_blobs", ttk.Button, text="Detect Blobs", command=self.__detect_blobs)
         
         #Filter options
         self.__right_widget_manager.add_widget("filter_parameters", ttk.Label, text="Filter Parameters", style = "Bold.TLabel")
@@ -244,7 +244,7 @@ class MainGUI(ttk.Frame):
         self.canvas.register_ctrl_release(self.__reset_ctrl)
         self.canvas.register_mouse_move(self.__handle_mouse_movement)
 
-    def __set_ctrl(self, event):
+    def __set_ctrl(self):
         self.__ctrl_pressed = True
         
     def __reset_ctrl(self, event):
@@ -435,7 +435,7 @@ class MainGUI(ttk.Frame):
             return
 
         self.canvas.delete("IMG")
-        self.canvas.delete("BlobLayer")
+        
         
         scale_label = str(scale) + " X"
         self.__bottom_widget_manager.get_widget("scale").config(text=scale_label)
@@ -473,6 +473,8 @@ class MainGUI(ttk.Frame):
            
         if not self.__draw_blobs:
             return
+
+        self.canvas.delete("BlobLayer")
         
         if self.blob_manager is not None:
             #image_with_blobs = self.original_image.copy()
@@ -547,25 +549,27 @@ class MainGUI(ttk.Frame):
         self.__filter_processor.set_sigma_color(sigma_color)
         self.__filter_processor.set_sigma_space(sigma_space)
 
-            
-    def detect_blobs(self):
+
+
+    def __detect_blobs(self):
         if not self.__is_image_loaded:
             return
 
+        widget = self.__right_widget_manager.get_widget("detect_blobs")
+        widget.config(text="Processing...")
         self.__right_widget_manager.disable_widget("detect_blobs")
+        widget.update_idletasks()
+
         self.__set_filter_params()
         self.__set_blob_detector_params()
         
-        
-        #print(self.__right_widget_manager.get_widget("Area").get_values())
-        
-        #min_area = int(self.min_area.get() if hasattr(self.min_area, 'get') else 10)
-        #max_area = int(self.max_area.get() if hasattr(self.max_area, 'get') else 1000)
-        
         self.__blob_detector.detect_blobs()
         self.canvas.redraw()
+
+
+        widget.config(text="Detect Blobs")
         self.__right_widget_manager.enable_widget("detect_blobs")
-        #self.display_image()
+        widget.update_idletasks()
 
 
     def __load_background(self):
