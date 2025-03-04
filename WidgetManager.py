@@ -40,6 +40,16 @@ class WidgetManager:
             elif "state" in widget.config():
                 widget.config(state="disabled")
 
+    def enable_all_widgets(self):
+        """Enable all registered widgets."""
+        for name in self.widgets:
+            self.enable_widget(name)
+
+    def disable_all_widgets(self):
+        """Disable all registered widgets."""
+        for name in self.widgets:
+            self.disable_widget(name)
+                
     '''
                 
     def disable_widget(self, name):
