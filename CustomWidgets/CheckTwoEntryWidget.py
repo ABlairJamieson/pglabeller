@@ -3,8 +3,8 @@ from tkinter import ttk
 
 class CheckTwoEntryWidget(ttk.Frame):
     def __init__(self, master, label_text="Option", default_values=(False, "0", "0"), 
-                 min_value=0, max_value=100, **kwargs):
-        super().__init__(master, **kwargs)
+                 min_value=0, max_value=100, style="UiPanel.TFrame", **kwargs):
+        super().__init__(master, style=style, **kwargs)
 
         # Store min/max values for validation
         self.min_value = min_value
@@ -15,22 +15,17 @@ class CheckTwoEntryWidget(ttk.Frame):
         entry1_value = str(default_values[1])  
         entry2_value = str(default_values[2])  
 
-        # Create ttk Styles for Entry Color Change
-        self.style = ttk.Style()
-        self.style.configure("Normal.TEntry", fieldbackground="white")  # Default white
-        self.style.configure("Red.TEntry", fieldbackground="#ff9999")  # Light red
-
         # Create variables
         self.var_check = tk.BooleanVar(value=check_value)
         self.var_entry1 = tk.StringVar(value=entry1_value)
         self.var_entry2 = tk.StringVar(value=entry2_value)
 
         # Create widgets
-        self.check = ttk.Checkbutton(self, text=label_text, variable=self.var_check, command=self.toggle_entries)
-        self.entry1 = ttk.Entry(self, textvariable=self.var_entry1, width=8, style="Normal.TEntry", validate="focusout", 
-                                validatecommand=(self.register(self.validate_entry), "%P", "1"))
-        self.entry2 = ttk.Entry(self, textvariable=self.var_entry2, width=8, style="Normal.TEntry", validate="focusout", 
-                                validatecommand=(self.register(self.validate_entry), "%P", "2"))
+        self.check = ttk.Checkbutton(self, text=label_text, variable=self.var_check, command=self.toggle_entries, style="Pg.TCheckbutton")
+        self.entry1 = ttk.Entry(self, textvariable=self.var_entry1, width=8, validate="focusout", 
+                                validatecommand=(self.register(self.validate_entry), "%P", "1"), style="Pg.TEntry")
+        self.entry2 = ttk.Entry(self, textvariable=self.var_entry2, width=8, validate="focusout", 
+                                validatecommand=(self.register(self.validate_entry), "%P", "2"), style="Pg.TEntry")
 
         # Layout using grid
         self.check.grid(row=0, column=0, padx=5, pady=5, sticky="w")
@@ -70,7 +65,7 @@ class CheckTwoEntryWidget(ttk.Frame):
         if entry_id == "1":
             self.var_entry1.set(str(self.min_value))
         elif entry_id == "2":
-            self.var_entry2.set(str(self.min_value))
+            self.var_entry2.set(str(int(self.max_value)))
 
     def check_values(self, modified_entry):
         """Change color based on entry comparisons. Highlights the modified entry."""
@@ -79,14 +74,14 @@ class CheckTwoEntryWidget(ttk.Frame):
             val2 = float(self.var_entry2.get()) if self.var_entry2.get().strip() else None
 
             # Reset both to default style first
-            self.entry1.configure(style="Normal.TEntry")
-            self.entry2.configure(style="Normal.TEntry")
+            self.entry1.configure(style="Pg.TEntry")
+            self.entry2.configure(style="Pg.TEntry")
 
             if val1 is not None and val2 is not None:
-                if val1 > val2 and modified_entry == "1":
-                    self.entry1.configure(style="Red.TEntry")  # Highlight entry1
-                elif val2 < val1 and modified_entry == "2":
-                    self.entry2.configure(style="Red.TEntry")  # Highlight entry2
+                if (val1 > val2 or val1 < self.min_value) and modified_entry == "1":
+                    self.entry1.configure(style="Error.TEntry")  # Highlight entry1
+                elif (val2 < val1 or val2 > self.max_value) and modified_entry == "2":
+                    self.entry2.configure(style="Error.TEntry")  # Highlight entry2
 
         except ValueError:
             pass  # Ignore errors for non-numeric inputs

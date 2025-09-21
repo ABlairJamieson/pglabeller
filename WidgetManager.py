@@ -25,21 +25,41 @@ class WidgetManager:
     def enable_widget(self, name):
         """Enable a widget by name."""
         widget = self.get_widget(name)
-        if widget:
-            if isinstance(widget, ttk.Widget):  # For ttk widgets
-                widget.state(["!disabled"])  # Remove 'disabled' state
-            elif "state" in widget.config():  # Check if 'state' is a valid option
-                widget.config(state="normal")  # Enable standard Tkinter widgets
+        if widget is None:
+            print(f"[WidgetManager] No widget found with name '{name}'")
+            return
 
+        if isinstance(widget, ttk.Widget):  # For ttk widgets
+            widget.state(["!disabled"])  # Remove 'disabled' state
+        elif "state" in widget.config():  # Check if 'state' is a valid option
+            widget.config(state="normal")  # Enable standard Tkinter widgets
+
+            
     def disable_widget(self, name):
         """Disable a widget by name."""
         widget = self.get_widget(name)
-        if widget:
-            if hasattr(widget, "state"):
-                widget.state(["disabled"])
-            elif "state" in widget.config():
-                widget.config(state="disabled")
+        if widget is None:
+            print(f"[WidgetManager] No widget found with name '{name}'")
+            return
 
+        if isinstance(widget, ttk.Widget):  # ttk widgets
+            widget.state(["disabled"])
+        else:  # classic tk widgets
+            widget.config(state="disabled")
+
+    '''
+    def disable_widget(self, name):
+        """Disable a widget by name."""
+        widget = self.get_widget(name)
+        if widget is None:
+            print(f"[WidgetManager] No widget found with name '{name}'")
+            return
+
+        if hasattr(widget, "state"):
+            widget.state(["disabled"])
+        elif "state" in widget.config():
+            widget.config(state="disabled")
+    '''
     def enable_all_widgets(self):
         """Enable all registered widgets."""
         for name in self.widgets:

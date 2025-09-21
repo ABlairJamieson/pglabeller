@@ -18,6 +18,12 @@ from CustomWidgets.LabelEntryWidget import LabelEntryWidget
 from CustomWidgets.CheckSpinboxWidget import CheckSpinboxWidget
 from CustomWidgets.LabelScaleWidget import LabelScaleWidget
 
+
+class PgEngine():
+    def __init__(self):
+        self.current_scene = SceneEdit()
+        self.scenes = {}
+
 class MainGUI(ttk.Frame):
     def __init__(self, master=None, **kwargs):
         super().__init__(master, **kwargs)
@@ -460,7 +466,7 @@ class MainGUI(ttk.Frame):
         
         self.canvas.create_image( shift[0], shift[1], anchor="nw", image=current_render, tag="IMG" )
 
-        #self.canvas.delete("BlobLayer")
+        self.canvas.delete("BlobLayer")
         if not self.__use_filter_renderer:
             self.__render_blobs(scale)
 
@@ -609,6 +615,7 @@ class MainGUI(ttk.Frame):
             self.__right_widget_manager.disable_widget("change_opacity")
             self.__right_widget_manager.disable_widget("cursor")
             self.__right_widget_manager.disable_widget("draw_circle")
+            self.__bottom_widget_manager.disable_widget("show_blobs")
         else:
             self.__right_widget_manager.enable_widget("d")
             self.__right_widget_manager.enable_widget("sigma_color")
@@ -616,6 +623,7 @@ class MainGUI(ttk.Frame):
             self.__right_widget_manager.enable_widget("change_opacity")
             self.__right_widget_manager.enable_widget("cursor")
             self.__right_widget_manager.enable_widget("draw_circle")
+            self.__bottom_widget_manager.enable_widget("show_blobs")
        
             
         self.canvas.redraw()

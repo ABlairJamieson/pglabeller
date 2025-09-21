@@ -8,7 +8,6 @@ class LayerRenderer:
     def __init__(self):
         self.__bg_mipmap = []
         self.__fg_mipmap = []
-        self.fg_opacity = 1.0
         self.__blended_render = None
 
         self.__shift = [0, 0]
@@ -27,6 +26,9 @@ class LayerRenderer:
             pyramid.append(new_img)
         return pyramid
 
+    def is_fg_loaded(self):
+        return (self.current_fg != None)
+    
     def load_background(self, filename):
         if not self.__fg_mipmap:
             print("Load the foreground first")
@@ -45,8 +47,6 @@ class LayerRenderer:
         self.__fg_mipmap = self.__build_mipmap(self.current_fg)
         self.__bg_mipmap = []
 
-    def set_opacity(self, opacity):
-        self.fg_opacity = opacity
                 
 
     def __render_foreground(self, region_box, new_width, new_height, mipmap_level):
@@ -63,21 +63,21 @@ class LayerRenderer:
         bg_img = self.__bg_mipmap[mipmap_level].crop(region_box)
         return bg_img.resize((new_width, new_height), Image.BILINEAR)
 
-    def __blend_layers(self, fg, bg):
+    def __blend_layers(self, fg, bg, fg_opacity):
         # Ensure both renders are available.
         if fg is not None:
             if bg is not None:
                 bg_np = np.array(bg).astype(np.float32)
                 fg_np = np.array(fg).astype(np.float32)
         
-                blended_np = bg_np * (1 - self.fg_opacity) + fg_np * self.fg_opacity
+                blended_np = bg_np * (1 - fg_opacity) + fg_np * fg_opacity
                 blended_np = np.clip(blended_np, 0, 255).astype(np.uint8)
                 blended_img = Image.fromarray(blended_np)
                 self.__blended_render = ImageTk.PhotoImage(blended_img)
 
             else:
                 fg_np = np.array(fg).astype(np.float32)
-                blended_np = fg_np * self.fg_opacity
+                blended_np = fg_np * fg_opacity
                 blended_np = np.clip(blended_np, 0, 255).astype(np.uint8)
                 blended_img = Image.fromarray(blended_np)
                 self.__blended_render = ImageTk.PhotoImage(blended_img)
@@ -85,7 +85,7 @@ class LayerRenderer:
             
 
     
-    def render(self, orig_top_left, orig_bottom_right, scale):
+    def render(self, orig_top_left, orig_bottom_right, scale, fg_opacity=1.0):
                 
         if not self.__fg_mipmap:
             return
@@ -135,5 +135,5 @@ class LayerRenderer:
         
         bg_render = self.__render_background(region_box, new_width, new_height, selected_level)
         
-        self.__blend_layers(fg_render, bg_render)
+        self.__blend_layers(fg_render, bg_render, fg_opacity)
         

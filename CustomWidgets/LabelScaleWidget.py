@@ -3,10 +3,10 @@ from tkinter import ttk
 
 class LabelScaleWidget(ttk.Frame):
     def __init__(self, master, label_text="Label", min_value=0, max_value=100, 
-                 default_value=None, orient="horizontal", **kwargs):
+                 default_value=None, orient="horizontal", style="UiPanel.TFrame", **kwargs):
         # Extract the command callback from kwargs, if provided.
         self._command = kwargs.pop("command", None)
-        super().__init__(master, **kwargs)
+        super().__init__(master, style=style, **kwargs)
         
         self.min_value = min_value
         self.max_value = max_value
@@ -18,11 +18,12 @@ class LabelScaleWidget(ttk.Frame):
         self.value_var = tk.DoubleVar(value=default_value)
         
         # Create the label.
-        self.label = ttk.Label(self, text=label_text)
+        self.label = ttk.Label(self, text=label_text, style="Pg.TLabel")
         # Create the scale widget with the command set to a wrapper method.
         self.scale = ttk.Scale(
             self, orient=orient, from_=min_value, to=max_value,
-            variable=self.value_var, command=self._on_scale_change
+            variable=self.value_var, command=self._on_scale_change,
+            style="TScale"
         )
         
         # Layout: label on the left, scale on the right.
