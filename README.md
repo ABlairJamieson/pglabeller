@@ -1,9 +1,9 @@
 # PG Labeller
 
 GUI to label images. Uses opencv simple blob detector to help find features to label.
-...
->python3 PgLabeller.py 
-...
+* python3 PgLabeller.py 
+
+<img src="images/PgLabellerSS.png">
 
 
 # Features
