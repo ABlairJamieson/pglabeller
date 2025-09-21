@@ -3,6 +3,8 @@ from tkinter import filedialog
 from PIL import Image, ImageTk
 import math
 import numpy as np
+from tkinter import messagebox
+
 
 class LayerRenderer:
     def __init__(self):
@@ -36,8 +38,10 @@ class LayerRenderer:
 
         image = Image.open(filename).convert("RGB")
         if image.size != self.__fg_mipmap[0].size:
-            print("foreground and background images have different size. resizing background image")
+            messagebox.showerror("Error", "foreground and background images have different sizes. Resizing background image")
             image = image.resize(self.__fg_mipmap[0].size, Image.BILINEAR)
+            
+
             
         self.__bg_mipmap = self.__build_mipmap(image)
 

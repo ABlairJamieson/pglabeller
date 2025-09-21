@@ -13,8 +13,10 @@ GUI to label images. Uses opencv simple blob detector to help find features to l
 * New blobs can be manually added using draw circle tool at the bottom of the app.
 * You can show and hide detected blobs using the check button at the bottom of the app.
 * Bilateral filter is applied to the foreground image before using blob detector. You can check the filtered image using "show filtered image" check button on the right. Filtering parameters d, sigma_color, sigma_space can be set from the right control panel as well. See Opencv Bilateral Filter for definition of these parameters.
-* Once you use the menu bar to load the foreground image, you can use "Load Background" button on right control panel to load a background image. You can set the opacity of Fg image so that you can see background image which will perhaps help in labelling. This option is not available when you are looking at filtered image.
-* Can select blob using left click. Hold left ctrl and click to select multiple, or click in the background and drag to select multiple blobs, or ctrl+click and drag to add. 
+* Once you use the File menu to load the foreground image, you can use "Load Background" button in File menu to load a background image. You can set the opacity of Fg image using slider in right control panel to see the background image, which will perhaps help in labelling. This option is not available when you are looking at filtered image.
+* Can select blob using left click. Can add to the selection using ctrl+left click. Can box select as well, and ctrl+box select.
+* Google map style zoom and pan. Mouse scroll to zoom in and out at cursor point, and mouse wheel click and drag to pan.
+* Go to Mode and select Edit mode to edit/detect leds, and Label mode to label them.
 
 # Updates:
 * Added dark and light mode options for the app. Go to preference and select preferred mode.
