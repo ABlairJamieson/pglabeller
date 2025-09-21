@@ -2,28 +2,24 @@ import tkinter as tk
 from tkinter import ttk
 
 class LabelEntryWidget(ttk.Frame):
-    def __init__(self, master, label_text="Label", default_value="0", min_value=0, **kwargs):
-        super().__init__(master, **kwargs)
+    def __init__(self, master, label_text="Label", default_value="0", min_value=0, style="UiPanel.TFrame", **kwargs):
+        super().__init__(master, style=style, **kwargs)
         
         # Store the minimum value.
         self.min_value = min_value
-        
-        # Create custom styles for the entry.
-        self.style = ttk.Style()
-        self.style.configure("Normal.TEntry", fieldbackground="white")
-        self.style.configure("Red.TEntry", fieldbackground="#ff9999")
         
         # Create a StringVar to hold the entry value.
         self.var_entry = tk.StringVar(value=str(default_value))
         
         # Create a static label.
-        self.label = ttk.Label(self, text=label_text)
+        self.label = ttk.Label(self, text=label_text, style="Pg.TLabel")
         
         # Create an entry widget with validation on focus out.
         self.entry = ttk.Entry(
             self, textvariable=self.var_entry, width=10,
-            style="Normal.TEntry", validate="focusout",
-            validatecommand=(self.register(self.validate_entry), "%P")
+            validate="focusout",
+            validatecommand=(self.register(self.validate_entry), "%P"),
+            style="Pg.TEntry"
         )
         
         # Layout: label on the left, then entry.
@@ -56,11 +52,11 @@ class LabelEntryWidget(ttk.Frame):
         """Update the entry style based on whether the value is below the minimum."""
         try:
             num = float(self.var_entry.get()) if self.var_entry.get().strip() else None
-            self.entry.configure(style="Normal.TEntry")
+            self.entry.configure(style="Pg.TEntry")
             if num is not None and num < self.min_value:
-                self.entry.configure(style="Red.TEntry")
+                self.entry.configure(style="Error.TEntry")
         except ValueError:
-            self.entry.configure(style="Red.TEntry")
+            self.entry.configure(style="Error.TEntry")
     
     def get_value(self):
         """Return the current value of the entry."""

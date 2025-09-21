@@ -3,8 +3,8 @@ from tkinter import ttk
 
 class LabelTwoSpinboxWidget(ttk.Frame):
     def __init__(self, master, label_text="Label", default_values=("0", "0"),
-                 min_value=0, max_value=100, **kwargs):
-        super().__init__(master, **kwargs)
+                 min_value=0, max_value=100, style="UiPanel.TFrame", **kwargs):
+        super().__init__(master, style=style, **kwargs)
         
         # Store min and max values for validation.
         self.min_value = min_value
@@ -14,28 +14,24 @@ class LabelTwoSpinboxWidget(ttk.Frame):
         spin1_value = str(default_values[0])
         spin2_value = str(default_values[1])
         
-        # Create ttk Styles for Spinbox Color Change.
-        self.style = ttk.Style()
-        # Note: The style element for ttk.Spinbox may differ depending on your Tk version.
-        self.style.configure("Normal.TSpinbox", fieldbackground="white")
-        self.style.configure("Red.TSpinbox", fieldbackground="#ff9999")
-        
         # Create StringVar variables for spinboxes.
         self.var_spin1 = tk.StringVar(value=spin1_value)
         self.var_spin2 = tk.StringVar(value=spin2_value)
         
         # Create a static label.
-        self.label = ttk.Label(self, text=label_text)
+        self.label = ttk.Label(self, text=label_text, style="Pg.TLabel")
         
         # Create two ttk Spinboxes with validation.
         self.spin1 = ttk.Spinbox(self, from_=min_value, to=max_value, textvariable=self.var_spin1,
                                   width=8, validate="focusout",
                                   validatecommand=(self.register(self.validate_entry), "%P", "1"),
-                                  style="Normal.TSpinbox")
+                                 style="Pg.TSpinbox"
+                                  )
         self.spin2 = ttk.Spinbox(self, from_=min_value, to=max_value, textvariable=self.var_spin2,
                                   width=8, validate="focusout",
                                   validatecommand=(self.register(self.validate_entry), "%P", "2"),
-                                  style="Normal.TSpinbox")
+                                 style="Pg.TSpinbox"
+                                  )
         
         # Layout: label on the left, then the two spinboxes.
         self.label.grid(row=0, column=0, padx=5, pady=5, sticky="w")
@@ -67,7 +63,7 @@ class LabelTwoSpinboxWidget(ttk.Frame):
         if entry_id == "1":
             self.var_spin1.set(str(self.min_value))
         elif entry_id == "2":
-            self.var_spin2.set(str(self.min_value))
+            self.var_spin2.set(str(int(self.max_value)))
 
     def check_values(self, modified_entry):
         """Highlight the modified spinbox in red if the first value is greater than the second."""
@@ -76,15 +72,14 @@ class LabelTwoSpinboxWidget(ttk.Frame):
             val2 = float(self.var_spin2.get()) if self.var_spin2.get().strip() else None
             
             # Reset both spinboxes to normal style.
-            self.spin1.configure(style="Normal.TSpinbox")
-            self.spin2.configure(style="Normal.TSpinbox")
+            self.spin1.configure(style="Pg.TSpinbox")
+            self.spin2.configure(style="Pg.TSpinbox")
             
             if val1 is not None and val2 is not None:
-                if val1 > val2:
-                    if modified_entry == "1":
-                        self.spin1.configure(style="Red.TSpinbox")
-                    elif modified_entry == "2":
-                        self.spin2.configure(style="Red.TSpinbox")
+                if (val1 > val2 or val1 < self.min_value) and modified_entry == "1":
+                    self.spin1.configure(style="Error.TSpinbox")
+                elif (val2 < val1 or val2 > self.max_value) and modified_entry == "2":
+                    self.spin2.configure(style="Error.TSpinbox")
         except ValueError:
             pass  # Ignore non-numeric inputs.
     

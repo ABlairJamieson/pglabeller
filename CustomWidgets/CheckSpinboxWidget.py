@@ -3,31 +3,27 @@ from tkinter import ttk
 
 class CheckSpinboxWidget(ttk.Frame):
     def __init__(self, master, label_text="Enable Value:", default_values=(False, "20"),
-                 min_value=0, max_value=100, **kwargs):
-        super().__init__(master, **kwargs)
+                 min_value=0, max_value=100, style="UiPanel.TFrame", **kwargs):
+        super().__init__(master, style=style, **kwargs)
         
         # Store min and max values for validation.
         self.min_value = min_value
         self.max_value = max_value
         
-        # Create custom styles for the spinbox.
-        self.style = ttk.Style()
-        self.style.configure("Normal.TSpinbox", fieldbackground="white")
-        self.style.configure("Red.TSpinbox", fieldbackground="#ff9999")
-        
+          
         # Create variables for the checkbutton and spinbox.
         self.var_check = tk.BooleanVar(value=default_values[0])
         self.var_spin = tk.StringVar(value=str(default_values[1]))
         
         # Create a checkbutton.
         self.check = ttk.Checkbutton(self, text=label_text, variable=self.var_check,
-                                     command=self.toggle_spinbox)
+                                     command=self.toggle_spinbox, style="Pg.TCheckbutton")
         # Create a ttk.Spinbox with validation.
         self.spin = ttk.Spinbox(
             self, from_=min_value, to=max_value, textvariable=self.var_spin,
             width=8, validate="focusout",
             validatecommand=(self.register(self.validate_entry), "%P"),
-            style="Normal.TSpinbox"
+            style="Pg.TSpinbox"
         )
         
         # Layout: checkbox on the left and spinbox on the right.
@@ -70,9 +66,9 @@ class CheckSpinboxWidget(ttk.Frame):
         """Optionally update the spinbox style if the value is invalid."""
         try:
             num = float(self.var_spin.get()) if self.var_spin.get().strip() else None
-            self.spin.configure(style="Normal.TSpinbox")
+            self.spin.configure(style="Pg.TSpinbox")
             if num is not None and not (self.min_value <= num <= self.max_value):
-                self.spin.configure(style="Red.TSpinbox")
+                self.spin.configure(style="Error.TSpinbox")
         except ValueError:
             pass
 
@@ -80,13 +76,14 @@ class CheckSpinboxWidget(ttk.Frame):
         """Return the state of the checkbox and the current spinbox value."""
         return self.var_check.get(), self.var_spin.get()
 
+    '''
     def set_values(self, checked, value):
         """Set the checkbox and spinbox values and update the widget state."""
         self.var_check.set(checked)
         self.var_spin.set(value)
         self.toggle_spinbox()
         self.check_value()
-
+    '''
     # --- State Management Methods ---
     def set_state(self, state):
         """Enable or disable both the checkbutton and spinbox."""
@@ -117,7 +114,8 @@ class CheckSpinboxWidget(ttk.Frame):
 if __name__ == "__main__":
     root = tk.Tk()
     root.title("CheckBox and Spinbox Widget Example")
-
+    style = ttk.Style(root)
+    style.theme_use("clam")
     widget = CheckSpinboxWidget(root, label_text="Enable Value:", default_values=(False, "20"),
                                 min_value=10, max_value=100)
     widget.pack(padx=10, pady=10)

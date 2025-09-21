@@ -2,7 +2,7 @@
 
 GUI to label images. Uses opencv simple blob detector to help find features to label.
 ...
->python3 main.py (main.py will be renamed to represent the app name in the end)
+>python3 PgLabeller.py 
 ...
 
 
@@ -15,6 +15,14 @@ GUI to label images. Uses opencv simple blob detector to help find features to l
 * Bilateral filter is applied to the foreground image before using blob detector. You can check the filtered image using "show filtered image" check button on the right. Filtering parameters d, sigma_color, sigma_space can be set from the right control panel as well. See Opencv Bilateral Filter for definition of these parameters.
 * Once you use the menu bar to load the foreground image, you can use "Load Background" button on right control panel to load a background image. You can set the opacity of Fg image so that you can see background image which will perhaps help in labelling. This option is not available when you are looking at filtered image.
 * Can select blob using left click. Hold left ctrl and click to select multiple, or click in the background and drag to select multiple blobs, or ctrl+click and drag to add. 
+
+# Updates:
+* Added dark and light mode options for the app. Go to preference and select preferred mode.
+* Added Scene system to switch between Edit and label mode. Edit mode will be used for detecting and editing leds(blobs) and labelling mode will be used to label the detected leds.
+* Labeling mode coming soon...
+* Reorganized code to fit the scene system.
+
+
 
 # To Do:
 * Have two modes: one for detecting and editing blobs, i.e. Edit mode and one for Labeling blobs, i.e. Label mode.

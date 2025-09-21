@@ -11,9 +11,10 @@ class PanZoomCanvas(tk.Canvas):
         self.__offset = np.array([0.0, 0.0])  # Offset: canvas coordinate of image’s top-left.
         self.__render_callback = None  # Callback for external drawing.
         self.__pan_start = None      # Starting point for panning.
-
+        self.__min_scale = 0.025
+        self.__max_scale = 16.0
+        self.__prev_size = (self.winfo_width(), self.winfo_height())
         self.__register_actions()
-        parent.bind("<Configure>", self.__on_resize)
         
     def __register_actions(self):
         self.bind("<MouseWheel>", self.__on_mousewheel)  # windows/mac scroll.
@@ -104,12 +105,10 @@ class PanZoomCanvas(tk.Canvas):
         self.__redraw_image()
                 
     def __on_mousewheel(self, event):
-        min_scale = 0.025
-        max_scale = 16.0
         if event.num == 5 or event.delta == -120:
-            scale_factor = 0.5 if self.__scale > min_scale else 1.0
+            scale_factor = 0.5 if self.__scale > self.__min_scale else 1.0
         elif event.num == 4 or event.delta == 120:
-            scale_factor = 2.0 if self.__scale < max_scale else 1.0
+            scale_factor = 2.0 if self.__scale < self.__max_scale else 1.0
         else:
             scale_factor = 1.0
         if scale_factor != 1.0:
@@ -131,18 +130,27 @@ class PanZoomCanvas(tk.Canvas):
         self.__offset += np.array([-dx, -dy])
         self.__redraw_image()
 
-
-    def __on_resize(self, event):
-        self.after(50, self.__redraw_image)
-
+    def on_resize(self, event):
+        #check if the window is actually resized
+        #if it is then redraw
+        new_size = (self.winfo_width(), self.winfo_height())
+        if new_size != self.__prev_size:
+            self.__prev_size = new_size
+            self.__redraw_image()
+        
     def screen_to_orig_image_coord(self, screen_coord):
         return (screen_coord + self.__offset) / self.__scale
 
     def orig_image_to_screen(self, orig_coord):
         return orig_coord*self.__scale - self.__offset 
 
-    def reset(self):
-        self.__scale = 1.0
-        self.__offset = np.array([0.0, 0.0])
+    def reset(self, image_width, image_height):
+        visible_width = self.winfo_width()
+        visible_height = self.winfo_height()
+        scale = min(visible_width/image_width, visible_height/image_height)
+        k = int(np.log2(scale))-1
+        self.__scale = 2**k 
+        self.__scale = np.clip(self.__scale, self.__min_scale, self.__max_scale)
+        self.__offset = np.array([(image_width*self.__scale-visible_width)/2, (image_height*self.__scale-visible_height)/2])
         self.__pan_start = None
         self.__redraw_image()
